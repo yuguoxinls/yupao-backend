@@ -1,7 +1,7 @@
 package com.jack.yupaobackend.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.jack.yupaobackend.domain.tags;
+import com.jack.yupaobackend.domain.Tags;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Mapper;
 * @Entity generator.domain.tags
 */
 @Mapper
-public interface tagsMapper extends BaseMapper<tags> {
+public interface TagsMapper extends BaseMapper<Tags> {
 
 }
 

@@ -14,6 +14,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -150,6 +151,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public int userLogout(HttpServletRequest request) {
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
+    }
+
+    @Override
+    public List<User> searchByTags(List<String> tagsList) {
+        if (tagsList == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        for (String tags : tagsList) {
+            queryWrapper = queryWrapper.like(User::getTags, tags);
+        }
+        List<User> userList = this.list(queryWrapper);
+        if (userList == null) throw new BusinessException(ErrorCode.NULL_ERROR);
+        return userList;
     }
 }
 

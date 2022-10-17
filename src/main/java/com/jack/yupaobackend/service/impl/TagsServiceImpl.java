@@ -1,9 +1,9 @@
 package com.jack.yupaobackend.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jack.yupaobackend.domain.tags;
-import com.jack.yupaobackend.mapper.tagsMapper;
-import com.jack.yupaobackend.service.tagsService;
+import com.jack.yupaobackend.domain.Tags;
+import com.jack.yupaobackend.mapper.TagsMapper;
+import com.jack.yupaobackend.service.TagsService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 * @createDate 2022-10-17 15:55:51
 */
 @Service
-public class tagsServiceImpl extends ServiceImpl<tagsMapper, tags>
-    implements tagsService {
+public class TagsServiceImpl extends ServiceImpl<TagsMapper, Tags>
+    implements TagsService {
 
 }
 

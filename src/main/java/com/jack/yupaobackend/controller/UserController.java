@@ -125,6 +125,20 @@ public class UserController {
         return user != null && user.getUserRole() == ADMIN_ROLE;
     }
 
+    /**
+     * 根据标签列表查询拥有该标签的所有用户
+     * @param tagsList
+     * @return
+     */
+    @PostMapping("/search/tags")
+    public BaseResponse searchByTags(@RequestBody List<String> tagsList, HttpServletRequest request){
+        boolean flag = isAdmin(request);
+        if (!flag) throw new BusinessException(ErrorCode.NO_AUTH);
+        List<User> users = userService.searchByTags(tagsList);
+        if (users == null) return ResultUtils.error(ErrorCode.NULL_ERROR);
+        return ResultUtils.success(users);
+    }
+
 
 
 }

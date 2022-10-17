@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.jack.yupaobackend.domain.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author yuguoxin
@@ -19,4 +20,6 @@ public interface UserService extends IService<User> {
     User getSafetyUser(User originUser);
 
     int userLogout(HttpServletRequest request);
+
+    List<User> searchByTags(List<String> tagsList);
 }

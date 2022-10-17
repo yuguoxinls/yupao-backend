@@ -16,7 +16,7 @@ import java.util.Date;
  */
 @TableName(value ="tags")
 @Data
-public class tags implements Serializable {
+public class Tags implements Serializable {
     /**
      * 用户名
      */
