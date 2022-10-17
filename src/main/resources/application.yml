@@ -15,6 +15,10 @@ spring:
   # session 失效时间
   session:
     timeout: 86400
+  mvc:
+    pathmatch:
+      # 配置策略
+      matching-strategy: ant-path-matcher
 
 
 mybatis-plus:

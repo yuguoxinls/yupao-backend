@@ -14,6 +14,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -141,6 +142,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setPhone(originUser.getPhone());
         safetyUser.setPlanetCode(originUser.getPlanetCode());
         safetyUser.setUserRole(originUser.getUserRole());
+        safetyUser.setTags(originUser.getTags());
         safetyUser.setEmail(originUser.getEmail());
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
@@ -164,7 +166,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         List<User> userList = this.list(queryWrapper);
         if (userList == null) throw new BusinessException(ErrorCode.NULL_ERROR);
-        return userList;
+        List<User> safetyUserList = new ArrayList<>();
+        for (User user : userList) {
+            User safetyUser = getSafetyUser(user);
+            safetyUserList.add(safetyUser);
+        }
+        return safetyUserList;
     }
 }
 
