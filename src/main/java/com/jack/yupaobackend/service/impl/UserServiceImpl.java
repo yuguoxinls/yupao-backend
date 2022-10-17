@@ -2,6 +2,8 @@ package com.jack.yupaobackend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jack.yupaobackend.common.ErrorCode;
 import com.jack.yupaobackend.domain.User;
 import com.jack.yupaobackend.exception.BusinessException;
@@ -14,10 +16,10 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.jack.yupaobackend.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -160,7 +162,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (tagsList == null){
             throw new BusinessException(ErrorCode.NULL_ERROR);
         }
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        // 这里有2种方式：SQL查询；内存查询
+        // 1. SQL查询
+        /*LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         for (String tags : tagsList) {
             queryWrapper = queryWrapper.like(User::getTags, tags);
         }
@@ -171,7 +175,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             User safetyUser = getSafetyUser(user);
             safetyUserList.add(safetyUser);
         }
-        return safetyUserList;
+        return safetyUserList;*/
+        // 2. 内存查询(将所有数据一次性加载内存中)
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        List<User> userList = this.list(lambdaQueryWrapper); // 查询所有用户
+        Gson gson = new Gson(); // JSON序列化包
+        return userList.stream().filter(user -> {
+            String tagsStr = user.getTags(); // 获得用户的标签
+            Set<String> tempTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>() {
+            }.getType()); // 使用fromJson将json转换为java对象
+            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>()); // 判空
+            for (String tagName : tagsList) {
+                if (!tempTagNameSet.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
     }
 }
 
