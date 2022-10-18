@@ -22,6 +22,7 @@ import static com.jack.yupaobackend.constant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "http://localhost:3000") // 解决跨越问题
 public class UserController {
 
     @Resource
