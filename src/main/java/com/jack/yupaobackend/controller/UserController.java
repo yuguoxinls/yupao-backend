@@ -1,6 +1,7 @@
 package com.jack.yupaobackend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jack.yupaobackend.common.BaseResponse;
 import com.jack.yupaobackend.common.ErrorCode;
 import com.jack.yupaobackend.common.ResultUtils;
@@ -9,6 +10,7 @@ import com.jack.yupaobackend.domain.request.UserLoginRequest;
 import com.jack.yupaobackend.domain.request.UserRegisterRequest;
 import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.service.UserService;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +24,7 @@ import static com.jack.yupaobackend.constant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "http://localhost:3000") // 解决跨越问题
+@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 public class UserController {
 
     @Resource
@@ -60,7 +62,7 @@ public class UserController {
 
     @GetMapping("/search")
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request){
-        boolean flag = isAdmin(request);
+        boolean flag = userService.isAdmin(request);
         if (!flag){
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
@@ -76,9 +78,16 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
+    @GetMapping("/recommend")
+    public BaseResponse<Page<User>> recommendUsers(@RequestParam int pageSize, @RequestParam int pageNum, HttpServletRequest request){
+        Page<User> userPage = userService.recommendUsers(pageSize, pageNum);
+
+        return ResultUtils.success(userPage);
+    }
+
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody int id, HttpServletRequest request){
-        boolean flag = isAdmin(request);
+        boolean flag = userService.isAdmin(request);
         if (!flag){
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
@@ -116,28 +125,33 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
-    /**
-     * 是否为管理员
-     * @param request
-     * @return
-     */
-    private boolean isAdmin(HttpServletRequest request){
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        return user != null && user.getUserRole() == ADMIN_ROLE;
-    }
+
 
     /**
      * 根据标签列表查询拥有该标签的所有用户
-     * @param tagsList
+     * @param tagNameList
      * @return
      */
-    @PostMapping("/search/tags")
-    public BaseResponse searchByTags(@RequestBody List<String> tagsList, HttpServletRequest request){
-        boolean flag = isAdmin(request);
+    @GetMapping("/search/tags") // TODO: 2022/10/18 根据标签搜索用户，前端会卡住
+    public BaseResponse<List<User>> searchByTags(@RequestParam List<String> tagNameList, HttpServletRequest request){
+        boolean flag = userService.isAdmin(request);
         if (!flag) throw new BusinessException(ErrorCode.NO_AUTH);
-        List<User> users = userService.searchByTags(tagsList);
+        List<User> users = userService.searchByTags(tagNameList);
         if (users == null) return ResultUtils.error(ErrorCode.NULL_ERROR);
         return ResultUtils.success(users);
+    }
+
+    /**
+     * 更新用户信息
+     * @param user 前端传过来的更改后的用户信息
+     * @param request
+     * @return
+     */
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request){
+        if (user == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        int r = userService.updateUser(user, request);
+        return ResultUtils.success(r);
     }
 
 

@@ -1,6 +1,5 @@
 package com.jack.yupaobackend.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jack.yupaobackend.domain.User;
 import org.apache.ibatis.annotations.Mapper;

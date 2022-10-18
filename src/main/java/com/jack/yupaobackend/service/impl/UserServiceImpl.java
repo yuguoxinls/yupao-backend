@@ -1,6 +1,7 @@
 package com.jack.yupaobackend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -21,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.jack.yupaobackend.constant.UserConstant.ADMIN_ROLE;
 import static com.jack.yupaobackend.constant.UserConstant.USER_LOGIN_STATE;
 
 
@@ -192,6 +194,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 是否为管理员
+     * @param request
+     * @return
+     */
+    public boolean isAdmin(HttpServletRequest request){
+        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        return user != null && user.getUserRole() == ADMIN_ROLE;
+    }
+
+    @Override
+    public int updateUser(User user, HttpServletRequest request) {
+        User loginUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        // 如果当前登录的用户是管理员，它可以修改信息
+        // 如果当前登录的用户和被修改信息的用户是同一个人，可以修改信息
+        if (!isAdmin(request) && (!Objects.equals(loginUser.getId(), user.getId()))) throw new BusinessException(ErrorCode.NO_AUTH);
+        boolean b = this.updateById(user);
+        if (!b) return -1;
+        return 0;
+    }
+
+    @Override
+    public Page<User> recommendUsers(int pageSize, int pageNum) {
+        Page<User> pageInfo = new Page<>(pageSize, pageNum);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        this.page(pageInfo, queryWrapper);
+        /*List<User> list = this.list(queryWrapper);
+        List<User> result = list.stream().map(user -> {
+            user.setUserPassword(null);
+            return user;
+        }).collect(Collectors.toList());*/
+        return pageInfo;
     }
 }
 

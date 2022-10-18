@@ -1,5 +1,6 @@
 package com.jack.yupaobackend.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jack.yupaobackend.domain.User;
 
@@ -22,4 +23,10 @@ public interface UserService extends IService<User> {
     int userLogout(HttpServletRequest request);
 
     List<User> searchByTags(List<String> tagsList);
+
+    boolean isAdmin(HttpServletRequest request);
+
+    int updateUser(User user, HttpServletRequest request);
+
+    Page<User> recommendUsers(int pageSize, int pageNum);
 }
