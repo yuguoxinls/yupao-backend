@@ -78,9 +78,16 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * 首页信息分页查询
+     * @param pageSize 8
+     * @param pageNum 1
+     * @param request
+     * @return
+     */
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(@RequestParam int pageSize, @RequestParam int pageNum, HttpServletRequest request){
-        Page<User> userPage = userService.recommendUsers(pageSize, pageNum);
+        Page<User> userPage = userService.recommendUsers(pageNum, pageSize);
 
         return ResultUtils.success(userPage);
     }

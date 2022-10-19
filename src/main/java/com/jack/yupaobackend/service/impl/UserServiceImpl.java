@@ -219,7 +219,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public Page<User> recommendUsers(int pageSize, int pageNum) {
-        Page<User> pageInfo = new Page<>(pageSize, pageNum);
+        Page<User> pageInfo = new Page<>(pageSize, pageNum); // 第一个参数表示当前是第几页，第二个参数表示一页内有几条数据
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         this.page(pageInfo, queryWrapper);
         /*List<User> list = this.list(queryWrapper);
