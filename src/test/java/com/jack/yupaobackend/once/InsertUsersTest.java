@@ -7,6 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class InsertUsersTest {
@@ -16,7 +19,8 @@ class InsertUsersTest {
 
     @Test
     void insertUser() {
-        for (int i = 0; i < 100; i++) {
+        List<User> userList = new ArrayList<>();
+        for (int i = 0; i < 50000; i++) {
             User user = new User();
             user.setUsername("test");
             user.setUserAccount("test");
@@ -29,7 +33,8 @@ class InsertUsersTest {
             user.setUserRole(0);
             user.setPlanetCode("10");
             user.setTags("[]");
-            userService.save(user);
+            userList.add(user);
         }
+        userService.saveBatch(userList);
     }
 }

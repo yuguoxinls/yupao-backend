@@ -87,7 +87,7 @@ public class UserController {
      */
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(@RequestParam int pageSize, @RequestParam int pageNum, HttpServletRequest request){
-        Page<User> userPage = userService.recommendUsers(pageNum, pageSize);
+        Page<User> userPage = userService.recommendUsers(pageNum, pageSize, request);
 
         return ResultUtils.success(userPage);
     }
@@ -107,19 +107,8 @@ public class UserController {
 
     @GetMapping("/current")
     public BaseResponse<User> currentUser(HttpServletRequest request){
-        User currentUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (currentUser == null){
-            return null;
-        }
-        //TODO 校验用户是否合法
-        Long id = currentUser.getId();
-        User user = userService.getById(id);
-        String planetCode = user.getPlanetCode();
-        if (StringUtils.isBlank(planetCode)){
-            throw new BusinessException(ErrorCode.NO_AUTH);
-        }
-        User safetyUser = userService.getSafetyUser(user);
-        return ResultUtils.success(safetyUser);
+        User currentUser = userService.currentUser(request);
+        return ResultUtils.success(currentUser);
 
     }
 

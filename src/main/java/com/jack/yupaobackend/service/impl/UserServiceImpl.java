@@ -6,18 +6,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jack.yupaobackend.common.ErrorCode;
+import com.jack.yupaobackend.common.ResultUtils;
 import com.jack.yupaobackend.domain.User;
 import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.mapper.UserMapper;
 import com.jack.yupaobackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -40,6 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private UserMapper userMapper;
 
     private static final String Salt = "yupi";
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
@@ -126,6 +134,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
         //5. 返回脱敏后的用户信息
         return safetyUser;
+    }
+
+    @Override
+    public User currentUser(HttpServletRequest request) {
+        User currentUser = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (currentUser == null){
+            return null;
+        }
+        //TODO 校验用户是否合法
+        Long id = currentUser.getId();
+        User user = this.getById(id);
+        String planetCode = user.getPlanetCode();
+        if (StringUtils.isBlank(planetCode)){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        return this.getSafetyUser(user);
     }
 
     /**
@@ -217,17 +241,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return 0;
     }
 
+
     @Override
-    public Page<User> recommendUsers(int pageSize, int pageNum) {
-        Page<User> pageInfo = new Page<>(pageSize, pageNum); // 第一个参数表示当前是第几页，第二个参数表示一页内有几条数据
+    public Page<User> recommendUsers(int pageSize, int pageNum, HttpServletRequest request) {
+        User currentUser = this.currentUser(request);
+        String redisKey = String.format("yupao:user:recommend:%s", currentUser.getId());
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Page<User> pageInfo = (Page<User>) valueOperations.get(redisKey);
+        // 如果缓存里有，从缓存里读数据
+        if (pageInfo != null) return pageInfo;
+        // 没有才查数据库
+        pageInfo = new Page<>(pageSize, pageNum); // 第一个参数表示当前是第几页，第二个参数表示一页内有几条数据
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        this.page(pageInfo, queryWrapper);
-        /*List<User> list = this.list(queryWrapper);
-        List<User> result = list.stream().map(user -> {
-            user.setUserPassword(null);
-            return user;
-        }).collect(Collectors.toList());*/
-        return pageInfo;
+        Page<User> userPage = this.page(pageInfo, queryWrapper);
+        // 查完数据库，写到缓存里
+        try {
+            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("redis save error: " + e);
+        }
+        return userPage;
     }
 }
 

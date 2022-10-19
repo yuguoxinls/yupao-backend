@@ -18,6 +18,8 @@ public interface UserService extends IService<User> {
 
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
+    User currentUser(HttpServletRequest request);
+
     User getSafetyUser(User originUser);
 
     int userLogout(HttpServletRequest request);
@@ -28,5 +30,5 @@ public interface UserService extends IService<User> {
 
     int updateUser(User user, HttpServletRequest request);
 
-    Page<User> recommendUsers(int pageSize, int pageNum);
+    Page<User> recommendUsers(int pageSize, int pageNum, HttpServletRequest request);
 }
