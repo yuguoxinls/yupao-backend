@@ -20,7 +20,7 @@ class InsertUsersTest {
     @Test
     void insertUser() {
         List<User> userList = new ArrayList<>();
-        for (int i = 0; i < 50000; i++) {
+        for (int i = 0; i < 500000; i++) {
             User user = new User();
             user.setUsername("test");
             user.setUserAccount("test");

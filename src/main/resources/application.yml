@@ -24,8 +24,9 @@ spring:
       # 配置策略
       matching-strategy: ant-path-matcher
   redis:
-    database: 0
+    database: 1
     port: 6379
+    host: localhost
 
 
 mybatis-plus:
