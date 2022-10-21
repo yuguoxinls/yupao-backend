@@ -1,4 +1,4 @@
-package com.jack.yupaobackend.domain;
+package com.jack.yupaobackend.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;

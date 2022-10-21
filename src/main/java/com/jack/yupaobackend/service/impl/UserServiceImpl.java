@@ -6,8 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jack.yupaobackend.common.ErrorCode;
-import com.jack.yupaobackend.common.ResultUtils;
-import com.jack.yupaobackend.domain.User;
+import com.jack.yupaobackend.model.domain.User;
 import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.mapper.UserMapper;
 import com.jack.yupaobackend.service.UserService;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 

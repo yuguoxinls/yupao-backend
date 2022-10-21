@@ -2,7 +2,7 @@ package com.jack.yupaobackend.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.jack.yupaobackend.domain.User;
+import com.jack.yupaobackend.model.domain.User;
 import com.jack.yupaobackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;

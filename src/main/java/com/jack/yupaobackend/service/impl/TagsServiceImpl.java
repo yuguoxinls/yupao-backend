@@ -1,7 +1,7 @@
 package com.jack.yupaobackend.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jack.yupaobackend.domain.Tags;
+import com.jack.yupaobackend.model.domain.Tags;
 import com.jack.yupaobackend.mapper.TagsMapper;
 import com.jack.yupaobackend.service.TagsService;
 import org.springframework.stereotype.Service;

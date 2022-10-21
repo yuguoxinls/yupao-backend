@@ -2,7 +2,7 @@ package com.jack.yupaobackend.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jack.yupaobackend.domain.User;
+import com.jack.yupaobackend.model.domain.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;

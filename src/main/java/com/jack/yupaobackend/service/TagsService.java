@@ -1,7 +1,7 @@
 package com.jack.yupaobackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jack.yupaobackend.domain.Tags;
+import com.jack.yupaobackend.model.domain.Tags;
 
 /**
 * @author Administrator

@@ -5,12 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jack.yupaobackend.common.BaseResponse;
 import com.jack.yupaobackend.common.ErrorCode;
 import com.jack.yupaobackend.common.ResultUtils;
-import com.jack.yupaobackend.domain.User;
-import com.jack.yupaobackend.domain.request.UserLoginRequest;
-import com.jack.yupaobackend.domain.request.UserRegisterRequest;
+import com.jack.yupaobackend.model.domain.User;
+import com.jack.yupaobackend.model.request.UserLoginRequest;
+import com.jack.yupaobackend.model.request.UserRegisterRequest;
 import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.service.UserService;
-import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +17,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.jack.yupaobackend.constant.UserConstant.ADMIN_ROLE;
-import static com.jack.yupaobackend.constant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
 @RequestMapping("/user")

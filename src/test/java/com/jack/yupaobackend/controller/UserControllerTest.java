@@ -1,6 +1,6 @@
 package com.jack.yupaobackend.controller;
 
-import com.jack.yupaobackend.domain.User;
+import com.jack.yupaobackend.model.domain.User;
 import com.jack.yupaobackend.service.UserService;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
