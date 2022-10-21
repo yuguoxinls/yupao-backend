@@ -8,12 +8,15 @@ import com.jack.yupaobackend.common.ResultUtils;
 import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.model.domain.Team;
 import com.jack.yupaobackend.model.dto.TeamQuery;
+import com.jack.yupaobackend.model.request.TeamAddRequest;
 import com.jack.yupaobackend.service.TeamService;
+import com.jack.yupaobackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -24,13 +27,14 @@ public class TeamController {
 
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/add")
-    public BaseResponse<Long> addTeam(@RequestBody Team team){
-        if (team == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        boolean result = teamService.save(team);
-        if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "保存失败！");
-        return ResultUtils.success(team.getId());
+    public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request){
+        if (teamAddRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        long teamId = teamService.addTeam(teamAddRequest, request);
+        return ResultUtils.success(teamId);
     }
 
     @DeleteMapping("/delete")

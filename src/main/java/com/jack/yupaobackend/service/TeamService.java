@@ -2,6 +2,9 @@ package com.jack.yupaobackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jack.yupaobackend.model.domain.Team;
+import com.jack.yupaobackend.model.request.TeamAddRequest;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
 * @author yuguoxin
@@ -10,4 +13,5 @@ import com.jack.yupaobackend.model.domain.Team;
 */
 public interface TeamService extends IService<Team> {
 
+    long addTeam(TeamAddRequest teamAddRequest, HttpServletRequest request);
 }
