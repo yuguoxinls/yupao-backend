@@ -2,9 +2,12 @@ package com.jack.yupaobackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jack.yupaobackend.model.domain.Team;
+import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.vo.TeamUserVo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author yuguoxin
@@ -14,4 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 public interface TeamService extends IService<Team> {
 
     long addTeam(TeamAddRequest teamAddRequest, HttpServletRequest request);
+
+    List<TeamUserVo> listTeams(TeamQuery teamQuery, HttpServletRequest request);
 }

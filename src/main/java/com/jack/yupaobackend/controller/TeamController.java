@@ -9,6 +9,7 @@ import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.model.domain.Team;
 import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.vo.TeamUserVo;
 import com.jack.yupaobackend.service.TeamService;
 import com.jack.yupaobackend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -72,13 +73,10 @@ public class TeamController {
      * @return
      */
     @GetMapping("/list")
-    public BaseResponse<List<Team>> listTeams(TeamQuery teamQuery){
+    public BaseResponse<List<TeamUserVo>> listTeams(TeamQuery teamQuery, HttpServletRequest request){
         if (teamQuery == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        Team team = new Team();
-        BeanUtils.copyProperties(teamQuery, team);
-        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<>(team);
-        List<Team> teamList = teamService.list(queryWrapper);
-        return ResultUtils.success(teamList);
+        List<TeamUserVo> teamUserVoList = teamService.listTeams(teamQuery, request);
+        return ResultUtils.success(teamUserVoList);
     }
 
     /**

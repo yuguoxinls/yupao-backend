@@ -27,6 +27,11 @@ public class TeamQuery extends PageRequest {
     private String description;
 
     /**
+     * 搜索关键词（同时对队伍名称和描述搜索）
+     */
+    private String searchText;
+
+    /**
      * 最大人数
      */
     private Integer maxNum;
