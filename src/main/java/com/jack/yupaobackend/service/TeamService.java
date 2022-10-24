@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.jack.yupaobackend.model.domain.Team;
 import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.request.TeamJoinRequest;
 import com.jack.yupaobackend.model.request.TeamUpdateRequest;
 import com.jack.yupaobackend.model.vo.TeamUserVo;
 
@@ -22,4 +23,6 @@ public interface TeamService extends IService<Team> {
     List<TeamUserVo> listTeams(TeamQuery teamQuery, HttpServletRequest request);
 
     boolean updateTeam(TeamUpdateRequest teamUpdateRequest, HttpServletRequest request);
+
+    boolean joinTeam(TeamJoinRequest teamJoinRequest, HttpServletRequest request);
 }

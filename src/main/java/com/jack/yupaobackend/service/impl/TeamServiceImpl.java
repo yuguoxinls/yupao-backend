@@ -1,4 +1,5 @@
 package com.jack.yupaobackend.service.impl;
+import java.util.Date;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +12,7 @@ import com.jack.yupaobackend.model.domain.UserTeam;
 import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.enums.TeamStatusEnum;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.request.TeamJoinRequest;
 import com.jack.yupaobackend.model.request.TeamUpdateRequest;
 import com.jack.yupaobackend.model.vo.TeamUserVo;
 import com.jack.yupaobackend.model.vo.UserVo;
@@ -206,6 +208,72 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         Team newTeam = new Team();
         BeanUtils.copyProperties(teamUpdateRequest, newTeam);
         return this.updateById(newTeam);
+    }
+
+    @Override
+    public boolean joinTeam(TeamJoinRequest teamJoinRequest, HttpServletRequest request) {
+        //1. 用户最多加入 5 个队伍
+        User currentUser = userService.currentUser(request);
+        Long currentUserId = currentUser.getId();
+        LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(currentUserId != null && currentUserId > 0, Team::getUserId, currentUserId);
+        long hasJoinTeam = this.count(queryWrapper);
+        if (hasJoinTeam >= 5) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户最多加入 5 个队伍");
+        }
+        //2. 队伍必须存在，只能加入未满、未过期的队伍
+        Long teamId = teamJoinRequest.getTeamId();
+        if (teamId == null || teamId <= 0) throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        Team team = this.getById(teamId);
+        if (team == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "队伍不存在");
+        }
+
+        LambdaQueryWrapper<UserTeam> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(UserTeam::getTeamId, teamId);
+        long teamHasJoinUser = userTeamService.count(lambdaQueryWrapper);
+        if (teamHasJoinUser >= team.getMaxNum()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "队伍人数已满");
+        }
+
+        Date expireTime = team.getExpireTime();
+        if (expireTime != null && expireTime.before(new Date())){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "队伍已过期");
+        }
+        //3. 不能加入自己的队伍，不能重复加入已加入的队伍（幂等性）
+        Long teamUserId = team.getUserId();
+        if (Objects.equals(teamUserId, currentUserId)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能加入自己创建的队伍，你已在队伍中");
+        }
+
+        lambdaQueryWrapper.eq(UserTeam::getUserId, currentUserId);
+        long count = userTeamService.count(lambdaQueryWrapper);
+        if (count > 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能重复加入已加入的队伍，你已在队伍中");
+        }
+        //4. 禁止加入私有的队伍
+        Integer status = team.getStatus();
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
+        if (TeamStatusEnum.PRIVATE.equals(statusEnum)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "禁止加入私有队伍");
+        }
+        //5. 如果加入的队伍是加密的，必须密码匹配才可以
+        if (TeamStatusEnum.SECRET.equals(statusEnum)) {
+            String joinPassword = teamJoinRequest.getPassword();
+            if (StringUtils.isBlank(joinPassword)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "需要提供密码");
+            }
+            String password = team.getPassword();
+            if (!password.equals(joinPassword)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+            }
+        }
+        //6. 新增队伍 - 用户关联信息
+        UserTeam userTeam = new UserTeam();
+        userTeam.setUserId(currentUserId);
+        userTeam.setTeamId(teamId);
+        userTeam.setJoinTime(new Date());
+        return userTeamService.save(userTeam);
     }
 }
 

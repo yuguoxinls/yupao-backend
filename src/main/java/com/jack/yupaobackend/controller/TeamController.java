@@ -9,6 +9,7 @@ import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.model.domain.Team;
 import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.request.TeamJoinRequest;
 import com.jack.yupaobackend.model.request.TeamUpdateRequest;
 import com.jack.yupaobackend.model.vo.TeamUserVo;
 import com.jack.yupaobackend.service.TeamService;
@@ -94,6 +95,14 @@ public class TeamController {
         LambdaQueryWrapper<Team> queryWrapper = new LambdaQueryWrapper<>(team);
         Page<Team> resultPage = teamService.page(page, queryWrapper);
         return ResultUtils.success(resultPage);
+    }
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request){
+        if (teamJoinRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        boolean result = teamService.joinTeam(teamJoinRequest, request);
+        if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "加入失败");
+        return ResultUtils.success(true);
     }
 
 }
