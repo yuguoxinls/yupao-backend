@@ -3,13 +3,11 @@ package com.jack.yupaobackend.model.dto;
 import com.jack.yupaobackend.common.PageRequest;
 import lombok.Data;
 
-import java.io.Serial;
 
 
 @Data
 public class TeamQuery extends PageRequest {
 
-    @Serial
     private static final long serialVersionUID = -9131018546674251945L;
     /**
      * id

@@ -11,6 +11,7 @@ import com.jack.yupaobackend.model.domain.UserTeam;
 import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.enums.TeamStatusEnum;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.request.TeamUpdateRequest;
 import com.jack.yupaobackend.model.vo.TeamUserVo;
 import com.jack.yupaobackend.model.vo.UserVo;
 import com.jack.yupaobackend.service.TeamService;
@@ -170,6 +171,41 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             teamUserVoList.add(teamUserVo);
         }
         return teamUserVoList;
+    }
+
+    @Override
+    public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, HttpServletRequest request) {
+        //1. 判断请求参数是否为空
+        if (teamUpdateRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        //2. 查询队伍是否存在
+        Long teamId = teamUpdateRequest.getId();
+        Team oldTeam = this.getById(teamId);
+        if (oldTeam == null) throw new BusinessException(ErrorCode.NULL_ERROR, "要更新的队伍不存在");
+        //3. 只有管理员或者队伍的创建者可以修改
+        User currentUser = userService.currentUser(request);
+        boolean isAdmin = userService.isAdmin(currentUser);
+        if (!isAdmin && !Objects.equals(currentUser.getId(), oldTeam.getUserId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        //4. 如果用户传入的新值和老值一致，就不用 update 了（可自行实现，降低数据库使用次数）
+        /*TeamUpdateRequest oldTeamRequest = new TeamUpdateRequest();
+        BeanUtils.copyProperties(oldTeam, oldTeamRequest);
+        if (oldTeamRequest == teamUpdateRequest) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "传入了未更新的参数");
+        }*/
+        //5. **如果队伍状态改为加密，必须要有密码**
+        Integer status = teamUpdateRequest.getStatus();
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
+        if (!TeamStatusEnum.PUBLIC.equals(statusEnum)) {
+            String password = teamUpdateRequest.getPassword();
+            if (StringUtils.isBlank(password)){
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "非公开房间必须设置密码");
+            }
+        }
+        //6. 更新成功
+        Team newTeam = new Team();
+        BeanUtils.copyProperties(teamUpdateRequest, newTeam);
+        return this.updateById(newTeam);
     }
 }
 

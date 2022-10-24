@@ -2,13 +2,13 @@ package com.jack.yupaobackend.model.vo;
 
 import lombok.Data;
 
-import java.io.Serial;
+
 import java.io.Serializable;
 import java.util.Date;
 
 @Data
 public class TeamUserVo implements Serializable {
-    @Serial
+
     private static final long serialVersionUID = -5942111012786370961L;
 
     /**

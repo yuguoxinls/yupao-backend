@@ -9,6 +9,7 @@ import com.jack.yupaobackend.exception.BusinessException;
 import com.jack.yupaobackend.model.domain.Team;
 import com.jack.yupaobackend.model.dto.TeamQuery;
 import com.jack.yupaobackend.model.request.TeamAddRequest;
+import com.jack.yupaobackend.model.request.TeamUpdateRequest;
 import com.jack.yupaobackend.model.vo.TeamUserVo;
 import com.jack.yupaobackend.service.TeamService;
 import com.jack.yupaobackend.service.UserService;
@@ -47,9 +48,9 @@ public class TeamController {
     }
 
     @PutMapping("/update")
-    public BaseResponse<Boolean> updateTeam(@RequestBody Team team){
-        if (team == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        boolean result = teamService.updateById(team);
+    public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request){
+        if (teamUpdateRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        boolean result = teamService.updateTeam(teamUpdateRequest, request);
         if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败！");
         return ResultUtils.success(true);
     }
