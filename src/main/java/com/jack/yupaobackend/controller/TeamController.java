@@ -40,14 +40,6 @@ public class TeamController {
         return ResultUtils.success(teamId);
     }
 
-    @DeleteMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(long id){
-        if (id <= 0) throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        boolean result = teamService.removeById(id);
-        if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败！");
-        return ResultUtils.success(true);
-    }
-
     @PutMapping("/update")
     public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request){
         if (teamUpdateRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -97,11 +89,47 @@ public class TeamController {
         return ResultUtils.success(resultPage);
     }
 
+    /**
+     * 用户加入队伍
+     * @param teamJoinRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/join")
     public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request){
         if (teamJoinRequest == null) throw new BusinessException(ErrorCode.PARAMS_ERROR);
         boolean result = teamService.joinTeam(teamJoinRequest, request);
         if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "加入失败");
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 用户退出队伍
+     * @param id
+     * @param request
+     * @return
+     */
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(@RequestBody Long id, HttpServletRequest request){
+        if (id == null || id <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = teamService.quitTeam(id, request);
+        if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "退出失败");
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 队长解散队伍
+     * @param id
+     * @param request
+     * @return
+     */
+    @DeleteMapping("/delete")
+    public BaseResponse<Boolean> deleteTeam(Long id, HttpServletRequest request){
+        if (id == null || id <= 0) throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        boolean result = teamService.deleteTeam(id, request);
+        if (!result) throw new BusinessException(ErrorCode.SYSTEM_ERROR, "解散队伍失败！");
         return ResultUtils.success(true);
     }
 

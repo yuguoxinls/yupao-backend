@@ -25,4 +25,8 @@ public interface TeamService extends IService<Team> {
     boolean updateTeam(TeamUpdateRequest teamUpdateRequest, HttpServletRequest request);
 
     boolean joinTeam(TeamJoinRequest teamJoinRequest, HttpServletRequest request);
+
+    boolean quitTeam(Long id, HttpServletRequest request);
+
+    boolean deleteTeam(Long id, HttpServletRequest request);
 }

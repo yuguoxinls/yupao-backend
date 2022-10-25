@@ -275,6 +275,104 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         userTeam.setJoinTime(new Date());
         return userTeamService.save(userTeam);
     }
+
+    /**
+     * 用户退出队伍
+     * @param id
+     * @param request
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean quitTeam(Long id, HttpServletRequest request) {
+        //2. 校验队伍是否存在
+        Team team = this.getById(id);
+        if (team == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        //3. 校验我是否已加入队伍
+        User currentUser = userService.currentUser(request);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "用户未登录");
+        }
+        Long userId = currentUser.getId();
+        Long teamId = team.getId();
+        LambdaQueryWrapper<UserTeam> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(userId != null && userId > 0, UserTeam::getUserId, userId);
+        queryWrapper.eq(teamId != null && teamId > 0, UserTeam::getTeamId, teamId);
+        long count = userTeamService.count(queryWrapper);
+        if (count == 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "你不在此队伍中，无法退出");
+        }
+        //4. 如果队伍
+        //   1. 只剩一人，队伍解散
+        queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(teamId != null && teamId > 0, UserTeam::getTeamId, teamId);
+        long userTeamCount = userTeamService.count(queryWrapper);
+        if (userTeamCount <= 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        if (userTeamCount == 1){
+            boolean removeById = this.removeById(teamId);
+            UserTeam userTeam = userTeamService.getOne(queryWrapper);
+            boolean remove = userTeamService.removeById(userTeam);
+            if (!removeById || !remove) throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }else {
+            //   2. 还有其他人
+            //      1. 如果是队长退出队伍，权限转移给第二早加入的用户 —— 先来后到
+            if (Objects.equals(team.getUserId(), userId)){
+                queryWrapper.last("order by id asc limit 2");
+                List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
+                UserTeam nextUserTeam = userTeamList.get(1);
+                Long nextUserTeamUserId = nextUserTeam.getUserId();
+                // 更新当前队伍的队长
+                Team updateTeam = new Team();
+                updateTeam.setId(teamId);
+                updateTeam.setUserId(nextUserTeamUserId);
+                this.updateById(updateTeam);
+            }
+            // 移除关系
+            queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserTeam::getUserId, userId);
+            queryWrapper.eq(teamId != null && teamId > 0, UserTeam::getTeamId, teamId);
+            boolean result = userTeamService.remove(queryWrapper);
+            if (!result){
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 队长解散队伍
+     * @param id
+     * @param request
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean deleteTeam(Long id, HttpServletRequest request) {
+        //2. 校验队伍是否存在
+        Team team = this.getById(id);
+        if (team == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        //3. 校验你是不是队伍的队长
+        User currentUser = userService.currentUser(request);
+        if (!Objects.equals(team.getUserId(), currentUser.getId())){
+            throw new BusinessException(ErrorCode.NO_AUTH, "你不是队长，无法解散队伍");
+        }
+        //4. 移除所有加入队伍的关联信息
+        LambdaQueryWrapper<UserTeam> queryWrapper = new LambdaQueryWrapper<>();
+        Long teamId = team.getId();
+        queryWrapper.eq(teamId != null && teamId > 0, UserTeam::getTeamId, teamId);
+        boolean removeResult = userTeamService.remove(queryWrapper);
+        if (!removeResult){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        //5. 删除队伍
+        return this.removeById(teamId);
+    }
 }
 
 
